@@ -52,6 +52,30 @@ This file tracks active branch-level workstreams for the internship application 
 - Constraints: no fabricated contacts, no automatic email sending, cap contact targets at three per company unless instructed, prioritize recruiter roles before employees.
 - Status: merged into `develop`.
 
+### `feature/apollo-mcp-client`
+
+- Owner scope: configurable Apollo MCP client seam.
+- Expected files: `src/internship_agent/apollo_mcp.py`, `tests/test_apollo_mcp.py`.
+- Problem log: `docs/problems/apollo-mcp-client.md`.
+- Constraints: injected MCP tool caller, no live network calls in tests, preserve missing emails/profile URLs.
+- Status: merged into `main`.
+
+### `feature/outreach-workflow`
+
+- Owner scope: safe Apollo-to-outreach workflow orchestration.
+- Expected files: `src/internship_agent/workflows.py`, `tests/test_workflows.py`.
+- Problem log: `docs/problems/outreach-workflow.md`.
+- Constraints: draft-only emails, approval-gated Gmail draft creation, injected tracking repositories.
+- Status: merged into `main`.
+
+### `feature/latex-resume-workflow`
+
+- Owner scope: safe LaTeX resume tailoring and compile checks.
+- Expected files: `src/internship_agent/resume_latex.py`, `tests/test_resume_latex.py`.
+- Problem log: `docs/problems/latex-resume-workflow.md`.
+- Constraints: evidence-backed edits only, new output file by default, approval before overwriting source.
+- Status: merged into `main`.
+
 ## Coordination Rules
 
 - Each branch must read `SPEC.md` before implementation.

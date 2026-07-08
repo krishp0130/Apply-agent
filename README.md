@@ -16,6 +16,9 @@ or submit applications automatically.
 - Approval gates for protected actions.
 - Deterministic draft-only outreach generation.
 - Draft-only Gmail adapter with injected service client.
+- Apollo MCP client seam with configurable tool and field mappings.
+- Safe recruiter outreach workflow from Apollo contacts to local drafts and optional Gmail drafts.
+- Safe LaTeX resume tailoring workflow with reviewable operations and compile checks.
 - GitHub Markdown source ingestion for:
   - `sndsh404/summer-2027-internships`
   - `vanshb03/Summer2027-Internships`
@@ -44,6 +47,7 @@ See `SPEC.md` for product behavior and `AGENTS.md` for repository working rules.
 ```text
 src/internship_agent/
   apollo.py          Apollo MCP-ready contact discovery contract
+  apollo_mcp.py      Configurable Apollo MCP client seam
   approval.py        Human approval gates for protected actions
   cli.py             Read-only command-line interface
   contacts.py        Contact priority ranking
@@ -53,10 +57,12 @@ src/internship_agent/
   models.py          Shared Pydantic domain models
   outreach.py        Deterministic draft-only outreach generation
   parsing.py         HTML role parsing helpers
+  resume_latex.py    Safe LaTeX resume tailoring and compile checks
   scoring.py         Explainable role scoring
   sources.py         Source ingestion configuration and fetch interfaces
   status.py          CSV-backed status summaries
   tracking.py        Generic CSV repository and row models
+  workflows.py       Recruiter outreach orchestration
 ```
 
 Problem logs and follow-up notes live in `docs/problems/`.
@@ -82,7 +88,7 @@ python -m pytest
 Current expected result after the latest integration:
 
 ```text
-53 passed
+77 passed
 ```
 
 ## CLI
@@ -138,8 +144,10 @@ and review pages.
 
 ## Contacts And Outreach
 
-`src/internship_agent/apollo.py` defines the adapter contract needed for Apollo
-MCP integration. It ranks returned contacts using project priority rules and
+`src/internship_agent/apollo.py` defines the contact discovery contract needed
+for Apollo MCP integration. `src/internship_agent/apollo_mcp.py` adapts an
+injected MCP tool caller into that contract with configurable tool names and
+field mappings. It ranks returned contacts using project priority rules and
 caps selected contacts at three per company by default.
 
 Priority order:
@@ -151,9 +159,25 @@ Priority order:
 5. Software Engineer
 6. Founder for small startups
 
-Outreach remains draft-only. `src/internship_agent/gmail.py` can create Gmail
-drafts through an injected Gmail service client after approval, but it exposes no
-send capability.
+`src/internship_agent/workflows.py` connects role data, Apollo contact discovery,
+draft-only email generation, optional Gmail draft creation, and injected tracking
+repositories. Outreach remains draft-only. `src/internship_agent/gmail.py` can
+create Gmail drafts through an injected Gmail service client after approval, but
+it exposes no send capability.
+
+## Resume Tailoring
+
+`src/internship_agent/resume_latex.py` provides deterministic LaTeX resume
+tailoring utilities. It reads a user-selected `.tex` file, builds a reviewable
+plan from explicit evidence-backed operations, writes tailored output to a new
+file by default, and can compile through an injected runner.
+
+Resume safety rules:
+
+- Do not invent projects, metrics, skills, dates, or experience.
+- Refuse edits when supporting evidence is missing.
+- Require approval before overwriting the source resume.
+- Prefer `latexmk -pdf`, then `pdflatex`, and report a blocked result if no compiler is available.
 
 ## Development Workflow
 
@@ -167,8 +191,9 @@ send capability.
 ## Next Work
 
 - Wire GitHub source ingestion into the CLI or a workflow command.
-- Add tracking writes for discovered roles and created Gmail drafts.
+- Add CLI commands for GitHub ingestion, recruiter outreach, and resume tailoring.
+- Add tracking writes for discovered roles, selected contacts, created Gmail drafts, and resume tailoring events.
 - Add parser diagnostics for skipped or malformed source rows.
-- Add a concrete Apollo MCP client once the callable tool schema is available.
+- Fill in the concrete Apollo MCP server/tool schema once provided.
 - Add a browser-assisted LinkedIn extraction helper that operates only on the current visible page.
 - Add a user profile configuration format and import command.
