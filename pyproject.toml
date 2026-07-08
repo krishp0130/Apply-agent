@@ -19,6 +19,9 @@ dev = [
     "pytest>=8.0",
 ]
 
+[project.scripts]
+internship-agent = "internship_agent.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
